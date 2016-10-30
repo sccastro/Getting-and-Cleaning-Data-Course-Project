@@ -1,7 +1,7 @@
 # Getting-and-Cleaning-Data-Course-Project
 This repository contains .R files and documentation files for the course "Getting and Cleaning data", available on <a href="https://www.coursera.org/">Coursera.</a>
 
-<b>CodeBook.md</b> is a code book that "describes the variables, the data, and any transformations or work that [I] performed to clean up the data."
+<b>[a relative link](CodeBook.md)</b> is a code book that "describes the variables, the data, and any transformations or work that [I] performed to clean up the data."
 
 <b>run_analysis.R</b> contains all the code to perform the analyses described in the 5 steps. These steps are:
 
