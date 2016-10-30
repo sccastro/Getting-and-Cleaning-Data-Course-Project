@@ -1,5 +1,5 @@
 # Getting-and-Cleaning-Data-Course-Project
-This repository contains .R files and documentation files for the course "Getting and Cleaning data", available on coursera.
+This repository contains .R files and documentation files for the course "Getting and Cleaning data", available on <a href="coursera.org">Coursera.</a>
 
 <b>CodeBook.md</b> is a code book that "describes the variables, the data, and any transformations or work that [I] performed to clean up the data."
 
