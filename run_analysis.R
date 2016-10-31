@@ -2,7 +2,7 @@
 
 rm(list=ls()); par(mfrow = c(1,1))
 
-
+library(dplyr)
 #Other users of this script will have to set their own working directory
 setwd("/Users/spencercastro/Documents/Getting-and-Cleaning-Data-Course-Project")
 
@@ -29,7 +29,7 @@ if(!file.exists(".UCIdata/UCI HAR Dataset/activity_labels.txt"))
   #I. Read files
 
     #A. Read activity_labels.txt:
-actLabels = read.table('./UCIdata/UCI HAR Dataset/activity_labels.txt')
+actLabels <- read.table('./UCIdata/UCI HAR Dataset/activity_labels.txt')
 
     #B. Read features.txt:
 features <- read.table('./UCIdata/UCI HAR Dataset/features.txt')
@@ -57,9 +57,9 @@ colnames(subjecttest) <- "subjectId"
 colnames(actLabels) <- c('actId','actType')
 
   #III Merge data:
-mrgtrain <- cbind(ytrain, subjecttrain, xtrain)
-mrgtest <- cbind(ytest, subjecttest, xtest)
-alldata <- rbind(mrgtrain, mrgtest)
+train <- cbind(ytrain, subjecttrain, xtrain)
+test <- cbind(ytest, subjecttest, xtest)
+alldata <- rbind(train, test)
 
 
 # 2. "Extracts only the measurements on the mean and standard dev ---------
@@ -75,7 +75,7 @@ meanSD <- (grepl("actId" , colNames) |
                    grepl("std.." , colNames) 
 )
 
-# 2.3 Making nessesary subset from alldata:
+  #III subset alldata
 meanSDdata <- alldata[ , meanSD == TRUE]
 
 
@@ -90,16 +90,16 @@ ActNames <- merge(meanSDdata, actLabels,
 
 # 4. "Appropriately labels the data set with descriptive variable  --------
 
-
+#Done previously
 
 # 5. "From the data set in step 4, creates a second, independent t --------
 
 
 # with the average of each variable for each activity and each subject."
 # 5.1 Making second tidy data set 
-CastroTidyData <- aggregate(. ~subjectId + actId, ActNames, mean)
-CastroTidyData <- CastroTidyData[order(CastroTidyData$subjectId, CastroTidyData$actId),]
+TidyData <- aggregate(. ~subjectId + actId, ActNames, mean)
+TidyData <- TidyData[order(TidyData$subjectId, TidyData$actId),]
 
 # 5.2 Writing second tidy data set in txt file
-write.table(CastroTidyData, "CastroTidyData.txt", row.name=FALSE)
-View(CastroTidyData)
+write.table(TidyData, "CastroTidyData.txt", row.name=FALSE)
+
