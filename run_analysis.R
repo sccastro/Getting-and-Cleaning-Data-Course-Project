@@ -1,78 +1,105 @@
-library(dplyr)
+# Clear/setup workspace ---------------------------------------------------
 
-# 0. Downloading dataset
-if(!file.exists("./data")){dir.create("./data")}
-fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
-download.file(fileUrl,destfile="./data/Dataset.zip")
-
-# Unzip dataSet to /data directory
-unzip(zipfile="./data/Dataset.zip",exdir="./data")
+rm(list=ls()); par(mfrow = c(1,1))
 
 
-# 1. Merging the training and the test sets to create one data set:
+#Other users of this script will have to set their own working directory
+setwd("/Users/spencercastro/Documents/Getting-and-Cleaning-Data-Course-Project")
 
-# 1.1 Reading files
+# SETUP: Get zipped file from UCI website ---------------------------------
+  #Make directory UCIdata
+if(!file.exists("./UCIdata"))
+{dir.create("./UCIdata")}
 
-# 1.1.1 Reading trainings tables:
-x_train <- read.table("./data/UCI HAR Dataset/train/X_train.txt")
-y_train <- read.table("./data/UCI HAR Dataset/train/y_train.txt")
-subject_train <- read.table("./data/UCI HAR Dataset/train/subject_train.txt")
 
-# 1.1.2 Reading testing tables:
-x_test <- read.table("./data/UCI HAR Dataset/test/X_test.txt")
-y_test <- read.table("./data/UCI HAR Dataset/test/y_test.txt")
-subject_test <- read.table("./data/UCI HAR Dataset/test/subject_test.txt")
+  #Get url
+UCIurl <- "http://archive.ics.uci.edu/ml/machine-learning-databases/00240/UCI%20HAR%20Dataset.zip"
 
-# 1.1.3 Reading feature vector:
-features <- read.table('./data/UCI HAR Dataset/features.txt')
+  #download file to /UCIdata
+if(!file.exists("./UCIdata/Dataset.zip"))
+  {download.file(UCIurl,destfile="./UCIdata/Dataset.zip")}
 
-# 1.1.4 Reading activity labels:
-activityLabels = read.table('./data/UCI HAR Dataset/activity_labels.txt')
+  #Unzip Dataset.zip to /UCIdata folder
+if(!file.exists(".UCIdata/UCI HAR Dataset/activity_labels.txt"))
+   {unzip(zipfile="./UCIdata/Dataset.zip",exdir="./UCIdata")}
 
-# 1.2 Assigning column names:
-colnames(x_train) <- features[,2] 
-colnames(y_train) <-"activityId"
-colnames(subject_train) <- "subjectId"
 
-colnames(x_test) <- features[,2] 
-colnames(y_test) <- "activityId"
-colnames(subject_test) <- "subjectId"
+# 1. "Merges the training and the test sets to create one data set --------
 
-colnames(activityLabels) <- c('activityId','activityType')
+  #I. Read files
 
-# 1.3 Merging all data in one set:
-mrg_train <- cbind(y_train, subject_train, x_train)
-mrg_test <- cbind(y_test, subject_test, x_test)
-setAllInOne <- rbind(mrg_train, mrg_test)
+    #A. Read activity_labels.txt:
+actLabels = read.table('./UCIdata/UCI HAR Dataset/activity_labels.txt')
 
-# 2. Extracting only the measurements on the mean and standard deviation for each measurement
+    #B. Read features.txt:
+features <- read.table('./UCIdata/UCI HAR Dataset/features.txt')
 
-# 2.1 Reading column names:
-colNames <- colnames(setAllInOne)
+    #C. Read train/training sets:
+xtrain <- read.table("./UCIdata/UCI HAR Dataset/train/x_train.txt")
+ytrain <- read.table("./UCIdata/UCI HAR Dataset/train/y_train.txt")
+subjecttrain <- read.table("./UCIdata/UCI HAR Dataset/train/subject_train.txt")
 
-# 2.2 Create vector for defining ID, mean and standard deviation:
-mean_and_std <- (grepl("activityId" , colNames) | 
+    #D. Read test/test sets:
+xtest <- read.table("./UCIdata/UCI HAR Dataset/test/x_test.txt")
+ytest <- read.table("./UCIdata/UCI HAR Dataset/test/y_test.txt")
+subjecttest <- read.table("./UCIdata/UCI HAR Dataset/test/subject_test.txt")
+
+  # II. Get names:
+    #...For the training data
+colnames(xtrain) <- features[,2] 
+colnames(ytrain) <-"actId"
+colnames(subjecttrain) <- "subjectId"
+    #...For the test data
+colnames(xtest) <- features[,2] 
+colnames(ytest) <- "actId"
+colnames(subjecttest) <- "subjectId"
+
+colnames(actLabels) <- c('actId','actType')
+
+  #III Merge data:
+mrgtrain <- cbind(ytrain, subjecttrain, xtrain)
+mrgtest <- cbind(ytest, subjecttest, xtest)
+alldata <- rbind(mrgtrain, mrgtest)
+
+
+# 2. "Extracts only the measurements on the mean and standard dev ---------
+
+
+  #I. Read names:
+colNames <- colnames(alldata)
+
+  #II. Create subid, mean and SD:
+meanSD <- (grepl("actId" , colNames) | 
                    grepl("subjectId" , colNames) | 
                    grepl("mean.." , colNames) | 
                    grepl("std.." , colNames) 
 )
 
-# 2.3 Making nessesary subset from setAllInOne:
-setForMeanAndStd <- setAllInOne[ , mean_and_std == TRUE]
+# 2.3 Making nessesary subset from alldata:
+meanSDdata <- alldata[ , meanSD == TRUE]
 
-# 3. Using descriptive activity names to name the activities in the data set:
-setWithActivityNames <- merge(setForMeanAndStd, activityLabels,
-                              by='activityId',
+
+# 3. "Uses descriptive activity names to name the activities in th --------
+
+
+ActNames <- merge(meanSDdata, actLabels,
+                              by='actId',
                               all.x=TRUE)
 
-# 4. Appropriately labeling the data set with descriptive variable names.
-# This step was made in previos steps =) See 1.3, 2.2, 2.3.
 
-# 5. Creating a second, independent tidy data set with the average of each variable for each activity and each subject:
 
+# 4. "Appropriately labels the data set with descriptive variable  --------
+
+
+
+# 5. "From the data set in step 4, creates a second, independent t --------
+
+
+# with the average of each variable for each activity and each subject."
 # 5.1 Making second tidy data set 
-secTidySet <- aggregate(. ~subjectId + activityId, setWithActivityNames, mean)
-secTidySet <- secTidySet[order(secTidySet$subjectId, secTidySet$activityId),]
+CastroTidyData <- aggregate(. ~subjectId + actId, ActNames, mean)
+CastroTidyData <- CastroTidyData[order(CastroTidyData$subjectId, CastroTidyData$actId),]
 
 # 5.2 Writing second tidy data set in txt file
-write.table(secTidySet, "secTidySet.txt", row.name=FALSE)
+write.table(CastroTidyData, "CastroTidyData.txt", row.name=FALSE)
+View(CastroTidyData)
